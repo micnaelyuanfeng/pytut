@@ -8,10 +8,6 @@ def sigmoid(x_dot_weight):
 
     return predict_output, x_dot_weight
 
-
-
-
-
 class NeutralNetwork:
     def __init__(self, layers_structure):
         self.layers_structure = layers_structure
@@ -47,15 +43,24 @@ class NeutralNetwork:
 
         for layer in range(1, self.layer_num):
             self.w["w" + str(layer)] = np.random.randn(self.layers_structure[layer], self.layers_structure[layer - 1])/np.sqrt(self.layers_structure[layer-1])
-            self.b["b" + str(layer)] = np.zeros((self.layers_structure[layer], 1))
-        
-        for l in self.w:
-            print("layer w", l)
-            for w in self.w[l]:
-                print("  weight matrix", w)  
+            self.b["b" + str(layer)] = np.zeros((self.layers_structure[layer], 1))      
     
-    def layer_activation_forward():
+    def layer_activation_forward(self, x, w, b):
+
+        input_sum = np.dot(w, x) + b
+        output    = sigmoid(input_sum)
+
+        return output, (x, w, b, input_sum)
+    
+    def compute_error(self, output):
         
+        m = self.y.shape[1]
+
+        error = -np.sum(np.multiply(np.log(output), self.y) + np.multiply(np.log(1 - output), 1 - self.y))/m
+
+        print(error)
+
+        return total_error
 
     def forward_propagation(self, x):
         caches            = []
@@ -68,15 +73,19 @@ class NeutralNetwork:
             input_current_layer = output_prev_layer
             output_prev_layer, cache = self.layer_activation_forward(input_current_layer, self.w["w" + str(layer_index)], self.b["b" + str(layer_index)])
             caches.append(cache)
-        
-        output, cache = self.layer_activation_forward(output_prev_layer,  self.w["w" + str(layer_index)], self.b["b" + str(layer_index)])
+
+        output, cache = self.layer_activation_forward(output_prev_layer,  self.w["w" + str(num_of_param_layer)], self.b["b" + str(num_of_param_layer)])
         caches.append(cache)
 
-        return output, cache
+        return output, caches
 
     def training_model(self):
+        np.random.seed(5)
+
         for i in range(0, self.num_iterations):
-            output, cache = self.forward_propagation(self.x)
+            output, caches = self.forward_propagation(self.x)
+
+            cost           = self.compute_error(output)
            
 
 
@@ -94,8 +103,15 @@ if __name__ == '__main__':
         else:
             expect_output.append([1,0])
     # [2, 4, 2]
+    expect_output = np.array(expect_output).T
+
     nn = NeutralNetwork([2, hidden_layer_neuron_num_list[2], 2])
+
     nn.set_xy(xy.T, expect_output)
     nn.set_learning_rate(0.1)
-    nn.set_num_iterations(3000)
+    nn.set_num_iterations(100000)
+
+    nn.training_model()
   
+
+   
