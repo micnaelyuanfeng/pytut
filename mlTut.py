@@ -2,11 +2,11 @@ import numpy as np
 import sklearn.datasets
 import sklearn.linear_model
 
-def sigmoid(x_dot_weight):
+def sigmoid(input_sum):
     #return predict value
-    predict_output = 1.0/(1 + np.exp(-x_dot_weight))
+    predict_output = 1.0/(1 + np.exp(-input_sum))
 
-    return predict_output, x_dot_weight
+    return predict_output, input_sum
 
 class NeutralNetwork:
     def __init__(self, layers_structure):
@@ -48,9 +48,9 @@ class NeutralNetwork:
     def layer_activation_forward(self, x, w, b):
 
         input_sum = np.dot(w, x) + b
-        output    = sigmoid(input_sum)
+        output, _ = sigmoid(input_sum) #return tuple 
 
-        return output, (x, w, b, input_sum)
+        return output, (x, w, b, input_sum)#this is a tuple
     
     def compute_error(self, output):
         
@@ -58,9 +58,7 @@ class NeutralNetwork:
 
         error = -np.sum(np.multiply(np.log(output), self.y) + np.multiply(np.log(1 - output), 1 - self.y))/m
 
-        print(error)
-
-        return total_error
+        return error
 
     def forward_propagation(self, x):
         caches            = []
@@ -79,6 +77,15 @@ class NeutralNetwork:
 
         return output, caches
 
+    def back_propagation(self, output, caches):
+        grads = {}
+
+        L = self.param_layer_num
+
+        print(output)
+
+        return grads
+
     def training_model(self):
         np.random.seed(5)
 
@@ -86,6 +93,8 @@ class NeutralNetwork:
             output, caches = self.forward_propagation(self.x)
 
             cost           = self.compute_error(output)
+
+            grads          = self.back_propagation(output, caches)
            
 
 
@@ -109,9 +118,11 @@ if __name__ == '__main__':
 
     nn.set_xy(xy.T, expect_output)
     nn.set_learning_rate(0.1)
-    nn.set_num_iterations(100000)
+    nn.set_num_iterations(1)
 
     nn.training_model()
   
+
+   
 
    
